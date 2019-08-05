@@ -115,12 +115,12 @@ Process output from the deldir Fortran routine
 macro finalize()
 	esc(quote
 		num_del = Int64(ndel[])
-        delsgs = transpose(reshape(delsgs[1:6*num_del], 6, num_del))
+        delsgs  = transpose(reshape(delsgs[1:6*num_del], 6, num_del))
 		num_dir = Int64(ndir[])
-        dirsgs = transpose(reshape(dirsgs[1:8*num_dir], 8, num_dir))
-		delsum = reshape(delsum, npd, 4)
-		dirsum = reshape(dirsum, npd, 3)
-		allsum = hcat(delsum, dirsum)
+        dirsgs  = transpose(reshape(dirsgs[1:8*num_dir], 8, num_dir))
+		delsum  = reshape(delsum, npd, 4)
+		dirsum  = reshape(dirsum, npd, 3)
+		allsum  = hcat(delsum, dirsum)
 	end)
 end
 
@@ -149,14 +149,12 @@ function deldirwrapper(x::Vector{Float64}, y::Vector{Float64},
 	# Call Fortran routine
 	while nerror[] >= 1
 		ccall((:master_, libdeldir), Nothing,
-		(Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Int32},
-		Ref{Int32}, Ref{Int32}, Ref{Int32}, Ref{Float64}, Ref{Float64}, 
-		Ref{Int32}, Ref{Float64}, 
-		Ref{Float64}, Ref{Int32}, Ref{Float64}, Ref{Int32}),
-		X, Y, float(rw), npd, 
-		ntot, nadj, madj, epsilon, delsgs, 
-		ndel, delsum, 
-		dirsgs, ndir, dirsum, nerror
+		    (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Int32}, Ref{Int32}, 
+             Ref{Int32}, Ref{Int32}, Ref{Float64}, Ref{Float64}, Ref{Int32}, 
+             Ref{Float64}, Ref{Float64}, Ref{Int32}, Ref{Float64}, Ref{Int32}),
+		    X, Y, float(rw), npd, ntot, 
+            nadj, madj, epsilon, delsgs, ndel, 
+            delsum, dirsgs, ndir, dirsum, nerror
 		)
 
 		@error_handling
