@@ -129,12 +129,12 @@ macro finalize()
 end
 
 """
-	deldirwrapper(x::Vector{Float64}, y::Vector{Float64}; ...)
+	deldirwrapper(x::Vector{Float64}, y::Vector{Float64}, epsilon::Float64, rw::Vector = [0.0; 1.0; 0.0; 1.0])
 
 Wrapper for the Fortran code that returns the output rather undigested.
 """
-function deldirwrapper(x::Vector{Float64}, y::Vector{Float64}, 
-                       rw::Vector = [0.0; 1.0; 0.0; 1.0]; epsilon::Float64 = 1e-9)
+function deldirwrapper(x::Vector{Float64}, y::Vector{Float64}, epsilon::Float64,
+												rw::Vector = [0.0; 1.0; 0.0; 1.0])
 
 	if length(x) != length(y)
         throw(DimensionMismatch("Coordinate vectors must be of equal length"))
@@ -178,7 +178,7 @@ Compute the Delaunay triangulation and Voronoi tesselation of the 2D points with
 
 Optional arguments are
 
-- `rw`: Boundary rectangle specified as a vector with `[xmin, xmax, ymin, ymax]`. By default, `rw` is the unit rectangle.
+- `rw`: Boundary rectangle specified as a vector with `[xmin; xmax; ymin; ymax]`. By default, `rw` is the unit rectangle.
 - `epsilon`: A value of epsilon used in testing whether a quantity is zeros, mainly in the context of whether points are collinear.
 If anomalous errors arise, it is possible that these may averted by adjusting the value of `epsilon` upward or downward.
 By default, `epsilon = 1e-9`.
@@ -206,9 +206,10 @@ Likewise for the `bp2` entry and the second endpoint of the edge.
 - The `nbpt` entry is the number of points in which the Voronoi cell intersects the boundary of the rectangular window.
 - The `vor_area` entry is the area of the Voronoi cell surrounding the point.
 """
-function deldir(x::Vector{Float64}, y::Vector{Float64}; args...)
-	del, vor, summ = deldirwrapper(x, y; args...)
+function deldir(x::Vector{Float64}, y::Vector{Float64}, rw, epsilon::Float64 = 1e-9)
+	del, vor, summ = deldirwrapper(x, y, epsilon, rw)
 
+#=	
 	delsgs = DataFrame()
 	delsgs[:x1]   = del[:, 1]
 	delsgs[:y1]   = del[:, 2]
@@ -235,7 +236,10 @@ function deldir(x::Vector{Float64}, y::Vector{Float64}; args...)
 	summary[:n_tside]  = round.(Int, summ[:, 5])
 	summary[:nbpt]     = round.(Int, summ[:, 6])
 	summary[:vor_area] = summ[:, 7]
-
-	return delsgs, vorsgs, summary
+=#	
+	ind1 = round.(Int, del[:, 5])
+	ind2 = round.(Int, del[:, 6])
+	return ind1, ind2
+	#return delsgs, vorsgs, summary
 end
 
